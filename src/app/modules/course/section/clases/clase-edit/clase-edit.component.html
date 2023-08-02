@@ -1,0 +1,653 @@
+<!--begin::Modal content-->
+<div class="modal-content">
+  <!--begin::Modal header-->
+  <div class="modal-header" id="kt_modal_add_user_header">
+    <!--begin::Modal title-->
+    <h2 class="fw-bolder">Edit Clase: {{ clase_selected.id }}</h2>
+
+    <!--end::Modal title-->
+    <!--begin::Close-->
+    <div
+      class="btn btn-icon btn-sm btn-active-icon-primary"
+      data-kt-users-modal-action="close"
+      (click)="modal.dismiss()"
+    >
+      <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+      <span class="svg-icon svg-icon-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <rect
+            opacity="0.5"
+            x="6"
+            y="17.3137"
+            width="16"
+            height="2"
+            rx="1"
+            transform="rotate(-45 6 17.3137)"
+            fill="currentColor"
+          />
+          <rect
+            x="7.41422"
+            y="6"
+            width="16"
+            height="2"
+            rx="1"
+            transform="rotate(45 7.41422 6)"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
+      <!--end::Svg Icon-->
+    </div>
+    <!--end::Close-->
+  </div>
+  <!--end::Modal header-->
+  <!--begin::Modal body-->
+  <div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
+    <!--begin::Form-->
+    <form
+      id="kt_project_settings_form"
+      class="form fv-plugins-bootstrap5 fv-plugins-framework"
+      novalidate="novalidate"
+    >
+      <span
+        class="spinner-border spinner-border-sm align-middle ms-2"
+        *ngIf="isLoading$ | async"
+      ></span>
+      <!--begin::Card body -->
+      <div class="card-body p-9">
+        <div class="row mb-8">
+          <div class="col-12">
+            <label class="fs-6 fw-bold mt-2 mb-3">Nombre de la clase</label>
+            <input
+              type="text"
+              class="form-control form-control-solid"
+              name="title"
+              placeholder="Introducción, Carrito de compra, Modulo de curso"
+              [(ngModel)]="name"
+            />
+          </div>
+        </div>
+        <div class="fv-row mb-7">
+          <!--begin::Label-->
+          <label class="required fw-bold fs-6 mb-2">Status</label>
+          <!--end::Label-->
+          <!--begin::Select-->
+          <select
+            class="form-control form-select-solid fw-bolder"
+            name="state"
+            [(ngModel)]="state"
+          >
+            <option value="1">Activo</option>
+            <option value="2">Inactivo</option>
+          </select>
+          <!--end::Select-->
+        </div>
+        <div class="row mb-8">
+          <!--begin::Col-->
+          <div class="col-12">
+            <div class="fs-6 fw-bold mt-2 mb-3">Descripción</div>
+          </div>
+          <!--end::Col-->
+          <!--begin::Col-->
+          <div class="col-12 fv-row fv-plugins-icon-container">
+            <ckeditor
+              [data]="description"
+              (change)="changeDescription($event)"
+            ></ckeditor>
+          </div>
+          <!--begin::Col-->
+        </div>
+        <div class="row mb-8">
+          <div class="col-5">
+            <label class="form-label">Sube tu video de la clase: *</label>
+            <div class="custom-file">
+              <input
+                type="file"
+                class="custom-file-input"
+                id="customFile"
+                accept="video/*"
+                name="video"
+                (change)="processVideo($event)"
+              />
+              <label class="custom-file-label" for="customFile"
+                >Choose file</label
+              >
+            </div>
+            <div *ngIf="link_video_course" class="py-4">
+              <iframe
+                [src]="urlVideo()"
+                frameborder="0"
+                allow="autoplay; fullscreen"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+          <div class="col-5">
+            <button
+              class="btn btn-sm btn-primary"
+              (click)="uploadVideo()"
+              *ngIf="!isUploadVideo"
+            >
+              +
+            </button>
+            <span
+              class="spinner-border spinner-border-sm align-middle ms-2"
+              *ngIf="isUploadVideo"
+            ></span>
+          </div>
+        </div>
+        <div class="row mb-8">
+          <!--begin::Col-->
+          <div class="col-12">
+            <label class="form-label">Sube tus recursos de la clase: *</label>
+          </div>
+          <div class="col-12 custom-file">
+            <input
+              multiple
+              type="file"
+              class="custom-file-input"
+              id="customFile"
+              (change)="processFile($event)"
+            />
+          </div>
+          <div class="col-5">
+            <button
+              class="btn btn-sm btn-primary"
+              (click)="uploadFiles()"
+              *ngIf="!isUploadFiles"
+            >
+              +
+            </button>
+            <span
+              class="spinner-border spinner-border-sm align-middle ms-2"
+              *ngIf="isUploadFiles"
+            ></span>
+          </div>
+          <div class="col-12">
+            <div class="card card-flush">
+              <!--begin::Header-->
+              <div class="card-header pt-7">
+                <!--begin::Title-->
+                <h3 class="card-title align-items-start flex-column">
+                  <span class="card-label fw-bolder text-dark"
+                    >Lista de archivos</span
+                  >
+                  <span class="text-gray-400 mt-1 fw-bold fs-6"
+                    >-----------</span
+                  >
+                </h3>
+                <!--end::Title-->
+                <!--begin::Toolbar-->
+                <div class="card-toolbar"></div>
+                <!--end::Toolbar-->
+              </div>
+              <!--end::Header-->
+              <!--begin::Body-->
+              <div class="card-body p-0">
+                <!--begin::Scroll-->
+                <div class="hover-scroll-overlay-y pe-6 me-n6">
+                  <ng-container *ngFor="let FILE of FILES">
+                    <!--begin::Item-->
+                    <div
+                      class="rounded border-gray-300 border-1 border-gray-300 border-dashed px-7 py-3 mb-6"
+                    >
+                      <!--begin::Info-->
+                      <div class="d-flex flex-stack mb-3">
+                        <!--begin::Wrapper-->
+                        <div class="me-3">
+                          <!--begin::Icon-->
+                          <img
+                            src="assets/media/svg/files/doc.svg"
+                            class="w-50px ms-n1 me-1"
+                            alt=""
+                          />
+                          <!--end::Icon-->
+                          <!--begin::Title-->
+                          <a
+                            href="#"
+                            onclick="return false;"
+                            class="text-gray-800 text-hover-primary fw-bolder"
+                            >{{ FILE.name }}</a
+                          >
+                          <!--end::Title-->
+                        </div>
+                        <!--end::Wrapper-->
+                        <!--begin::Action-->
+                        <div class="m-0">
+                          <!--begin::Menu-->
+                          <button
+                            class="btn btn-icon btn-color-gray-400 btn-active-color-primary justify-content-end"
+                            data-kt-menu-trigger="click"
+                            data-kt-menu-placement="bottom-end"
+                            data-kt-menu-overflow="true"
+                          >
+                            <!--begin::Svg Icon | path: icons/duotune/general/gen023.svg-->
+                            <span class="svg-icon svg-icon-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <rect
+                                  opacity="0.3"
+                                  x="2"
+                                  y="2"
+                                  width="20"
+                                  height="20"
+                                  rx="4"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="11"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="15"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="7"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                              </svg>
+                            </span>
+                            <!--end::Svg Icon-->
+                          </button>
+                          <!--begin::Menu 2-->
+                          <div
+                            class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-bold w-200px"
+                            data-kt-menu="true"
+                          >
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <div
+                                class="menu-content fs-6 text-dark fw-bolder px-3 py-4"
+                              >
+                                Quick Actions
+                              </div>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator mb-3 opacity-75"></div>
+                            <!--end::Menu separator-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3">New Ticket</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3"
+                                >New Customer</a
+                              >
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div
+                              class="menu-item px-3"
+                              data-kt-menu-trigger="hover"
+                              data-kt-menu-placement="right-start"
+                            >
+                              <!--begin::Menu item-->
+                              <a href="#" class="menu-link px-3">
+                                <span class="menu-title">New Group</span>
+                                <span class="menu-arrow"></span>
+                              </a>
+                              <!--end::Menu item-->
+                              <!--begin::Menu sub-->
+                              <div
+                                class="menu-sub menu-sub-dropdown w-175px py-4"
+                              >
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Admin Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Staff Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Member Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                              </div>
+                              <!--end::Menu sub-->
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3">New Contact</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator mt-3 opacity-75"></div>
+                            <!--end::Menu separator-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <div class="menu-content px-3 py-3">
+                                <a class="btn btn-primary btn-sm px-4" href="#"
+                                  >Generate Reports</a
+                                >
+                              </div>
+                            </div>
+                            <!--end::Menu item-->
+                          </div>
+                          <!--end::Menu 2-->
+                          <!--end::Menu-->
+                        </div>
+                        <!--end::Action-->
+                      </div>
+                      <!--end::Info-->
+                      <!--begin::Customer-->
+                      <div class="d-flex flex-stack">
+                        <!--begin::Name-->
+                        <span class="text-gray-400 fw-bolder"
+                          >Size
+                          <a
+                            href="#"
+                            onclick="return false;"
+                            class="text-gray-800 text-hover-primary fw-bolder"
+                            >{{ FILE.size }} KB</a
+                          ></span
+                        >
+                        <!--end::Name-->
+                        <!--begin::Label-->
+                        <span class="badge badge-light-success">Activo</span>
+                        <!--end::Label-->
+                      </div>
+                      <!--end::Customer-->
+                    </div>
+                    <!--end::Item-->
+                  </ng-container>
+                </div>
+                <!--end::Scroll-->
+              </div>
+              <!--end::Body-->
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card card-flush">
+              <!--begin::Header-->
+              <div class="card-header pt-7">
+                <!--begin::Title-->
+                <h3 class="card-title align-items-start flex-column">
+                  <span class="card-label fw-bolder text-dark"
+                    >Lista de archivos subidos</span
+                  >
+                  <span class="text-gray-400 mt-1 fw-bold fs-6"
+                    >Recursos descargables</span
+                  >
+                </h3>
+                <!--end::Title-->
+                <!--begin::Toolbar-->
+                <div class="card-toolbar"></div>
+                <!--end::Toolbar-->
+              </div>
+              <!--end::Header-->
+              <!--begin::Body-->
+              <div class="card-body p-0">
+                <!--begin::Scroll-->
+                <div class="hover-scroll-overlay-y pe-6 me-n6">
+                  <ng-container *ngFor="let FILE of FILES_CLASE">
+                    <!--begin::Item-->
+                    <div
+                      class="rounded border-gray-300 border-1 border-gray-300 border-dashed px-7 py-3 mb-6"
+                    >
+                      <!--begin::Info-->
+                      <div class="d-flex flex-stack mb-3">
+                        <!--begin::Wrapper-->
+                        <div class="me-3">
+                          <!--begin::Icon-->
+                          <img
+                            src="assets/media/svg/files/doc.svg"
+                            class="w-50px ms-n1 me-1"
+                            alt=""
+                          />
+                          <!--end::Icon-->
+                          <!--begin::Title-->
+                          <a
+                            href="#"
+                            onclick="return false;"
+                            class="text-gray-800 text-hover-primary fw-bolder"
+                            >{{ FILE.name_file }}</a
+                          >
+                          <!--end::Title-->
+                        </div>
+                        <!--end::Wrapper-->
+                        <!--begin::Action-->
+                        <div class="m-0">
+                          <!--begin::Menu-->
+                          <button
+                            class="btn btn-icon btn-color-gray-400 btn-active-color-primary justify-content-end"
+                            data-kt-menu-trigger="click"
+                            data-kt-menu-placement="bottom-end"
+                            data-kt-menu-overflow="true"
+                          >
+                            <!--begin::Svg Icon | path: icons/duotune/general/gen023.svg-->
+                            <span class="svg-icon svg-icon-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <rect
+                                  opacity="0.3"
+                                  x="2"
+                                  y="2"
+                                  width="20"
+                                  height="20"
+                                  rx="4"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="11"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="15"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                                <rect
+                                  x="7"
+                                  y="11"
+                                  width="2.6"
+                                  height="2.6"
+                                  rx="1.3"
+                                  fill="currentColor"
+                                ></rect>
+                              </svg>
+                            </span>
+                            <!--end::Svg Icon-->
+                          </button>
+                          <!--begin::Menu 2-->
+                          <div
+                            class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-bold w-200px"
+                            data-kt-menu="true"
+                          >
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <div
+                                class="menu-content fs-6 text-dark fw-bolder px-3 py-4"
+                              >
+                                Quick Actions
+                              </div>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator mb-3 opacity-75"></div>
+                            <!--end::Menu separator-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3">New Ticket</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3"
+                                >New Customer</a
+                              >
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div
+                              class="menu-item px-3"
+                              data-kt-menu-trigger="hover"
+                              data-kt-menu-placement="right-start"
+                            >
+                              <!--begin::Menu item-->
+                              <a href="#" class="menu-link px-3">
+                                <span class="menu-title">New Group</span>
+                                <span class="menu-arrow"></span>
+                              </a>
+                              <!--end::Menu item-->
+                              <!--begin::Menu sub-->
+                              <div
+                                class="menu-sub menu-sub-dropdown w-175px py-4"
+                              >
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Admin Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Staff Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                  <a href="#" class="menu-link px-3"
+                                    >Member Group</a
+                                  >
+                                </div>
+                                <!--end::Menu item-->
+                              </div>
+                              <!--end::Menu sub-->
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <a href="#" class="menu-link px-3">New Contact</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator mt-3 opacity-75"></div>
+                            <!--end::Menu separator-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                              <div class="menu-content px-3 py-3">
+                                <a class="btn btn-primary btn-sm px-4" href="#"
+                                  >Generate Reports</a
+                                >
+                              </div>
+                            </div>
+                            <!--end::Menu item-->
+                          </div>
+                          <!--end::Menu 2-->
+                          <!--end::Menu-->
+                        </div>
+                        <!--end::Action-->
+                      </div>
+                      <!--end::Info-->
+                      <!--begin::Customer-->
+                      <div class="d-flex flex-stack">
+                        <!--begin::Name-->
+                        <span class="text-gray-400 fw-bolder"
+                          >Size
+                          <a
+                            href="#"
+                            onclick="return false;"
+                            class="text-gray-800 text-hover-primary fw-bolder"
+                            >{{ FILE.size }} KB</a
+                          ></span
+                        >
+                        <!--end::Name-->
+                        <!--begin::Label-->
+                        <span class="badge badge-light-dark">
+                          {{ FILE.type }}
+                        </span>
+                        <!--end::Label-->
+
+                        <button
+                          class="btn btn-sm btn-danger"
+                          (click)="deleteFile($event, FILE)"
+                        >
+                          X
+                        </button>
+                      </div>
+                      <!--end::Customer-->
+                    </div>
+                    <!--end::Item-->
+                  </ng-container>
+                </div>
+                <!--end::Scroll-->
+              </div>
+              <!--end::Body-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end::Card body-->
+      <!--begin::Card footer-->
+      <div class="card-footer d-flex justify-content-end py-6 px-9">
+        <button
+          type="button"
+          (click)="save()"
+          class="btn btn-primary"
+          id="kt_project_settings_submit"
+        >
+          Guardar Cambios
+        </button>
+      </div>
+      <!--end::Card footer-->
+      <input type="hidden" />
+      <div></div>
+    </form>
+    <!--end:Form-->
+  </div>
+  <!--end::Modal body-->
+</div>
+<!--end::Modal content-->
